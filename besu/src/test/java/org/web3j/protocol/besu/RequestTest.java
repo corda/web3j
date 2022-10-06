@@ -22,11 +22,13 @@ import org.junit.jupiter.api.Test;
 import org.web3j.protocol.RequestTester;
 import org.web3j.protocol.core.DefaultBlockParameter;
 import org.web3j.protocol.core.DefaultBlockParameterName;
+import org.web3j.protocol.core.methods.request.EthFilter;
 import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.utils.Base64String;
 
 public class RequestTest extends RequestTester {
+
     private static final Base64String MOCK_ENCLAVE_KEY =
             Base64String.wrap("A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=");
     private static final Base64String MOCK_ENCLAVE_KEY_2 =
@@ -130,6 +132,57 @@ public class RequestTest extends RequestTester {
     }
 
     @Test
+    public void testibftDiscardValidatorVote() throws Exception {
+        final String accountId = "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73";
+        web3j.ibftDiscardValidatorVote(accountId).send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"ibft_discardValidatorVote\","
+                        + "\"params\":[\"0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73\"],\"id\":1}");
+    }
+
+    @Test
+    public void testIbftGetPendingVotes() throws Exception {
+        web3j.ibftGetPendingVotes().send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"ibft_getPendingVotes\","
+                        + "\"params\":[],\"id\":1}");
+    }
+
+    @Test
+    public void testIbftGetValidatorsByBlockNumber() throws Exception {
+        final DefaultBlockParameter blockParameter = DefaultBlockParameter.valueOf("latest");
+        web3j.ibftGetValidatorsByBlockNumber(blockParameter).send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"ibft_getValidatorsByBlockNumber\","
+                        + "\"params\":[\"latest\"],\"id\":1}");
+    }
+
+    @Test
+    public void testIbftGetValidatorsByBlockHash() throws Exception {
+        final String blockHash =
+                "0x98b2ddb5106b03649d2d337d42154702796438b3c74fd25a5782940e84237a48";
+        web3j.ibftGetValidatorsByBlockHash(blockHash).send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"ibft_getValidatorsByBlockHash\",\"params\":"
+                        + "[\"0x98b2ddb5106b03649d2d337d42154702796438b3c74fd25a5782940e84237a48\"]"
+                        + ",\"id\":1}");
+    }
+
+    @Test
+    public void testIbftProposeValidatorVote() throws Exception {
+        final String validatorAddress = "0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73";
+        web3j.ibftProposeValidatorVote(validatorAddress, true).send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"ibft_proposeValidatorVote\","
+                        + "\"params\":[\"0xFE3B557E8Fb62b89F4916B721be55cEb828dBd73\",true],\"id\":1}");
+    }
+
+    @Test
     public void testPrivGetTransactionCount() throws Exception {
         web3j.privGetTransactionCount(
                         "0x407d73d8a49eeb85d32cf465507dd71d507100c1", MOCK_PRIVACY_GROUP_ID)
@@ -139,6 +192,18 @@ public class RequestTest extends RequestTester {
                 "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getTransactionCount\","
                         + "\"params\":[\"0x407d73d8a49eeb85d32cf465507dd71d507100c1\",\"DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=\"],"
                         + "\"id\":1}");
+    }
+
+    @Test
+    public void testPrivDistributeRawTransaction() throws Exception {
+        final String rawTx =
+                "0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f"
+                        + "072445675058bb8eb970870f072445675";
+        web3j.privDistributeRawTransaction(rawTx).send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"priv_distributeRawTransaction\","
+                        + "\"params\":[\"0xd46e8dd67c5d32be8d46e8dd67c5d32be8058bb8eb970870f072445675058bb8eb970870f072445675\"],\"id\":1}");
     }
 
     @Test
@@ -203,31 +268,91 @@ public class RequestTest extends RequestTester {
     @Test
     public void testPrivGetCode() throws Exception {
         web3j.privGetCode(
+                        MOCK_PRIVACY_GROUP_ID.toString(),
                         "A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=",
-                        DefaultBlockParameterName.LATEST,
-                        MOCK_PRIVACY_GROUP_ID.toString())
+                        DefaultBlockParameterName.LATEST)
                 .send();
 
         verifyResult(
                 "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getCode\","
-                        + "\"params\":[\"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=\",\"latest\",\"DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=\"],\"id\":1}");
+                        + "\"params\":[\"DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=\",\"A1aVtMxLCUHmBVHXoZzzBgPbW/wj5axDpW9X8l91SGo=\",\"latest\"],\"id\":1}");
     }
 
     @Test
-    public void testEthCall() throws Exception {
+    public void testPrivCall() throws Exception {
         web3j.privCall(
+                        MOCK_PRIVACY_GROUP_ID.toString(),
                         Transaction.createEthCallTransaction(
                                 "0xa70e8dd61c5d32be8058bb8eb970870f07233155",
                                 "0xb60e8dd61c5d32be8058bb8eb970870f07233155",
                                 "0x0"),
-                        DefaultBlockParameter.valueOf("latest"),
-                        MOCK_PRIVACY_GROUP_ID.toString())
+                        DefaultBlockParameter.valueOf("latest"))
                 .send();
 
         verifyResult(
                 "{\"jsonrpc\":\"2.0\",\"method\":\"priv_call\","
-                        + "\"params\":[{\"from\":\"0xa70e8dd61c5d32be8058bb8eb970870f07233155\","
+                        + "\"params\":[\"DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=\",{\"from\":\"0xa70e8dd61c5d32be8058bb8eb970870f07233155\","
                         + "\"to\":\"0xb60e8dd61c5d32be8058bb8eb970870f07233155\",\"data\":\"0x0\"},"
-                        + "\"latest\",\"DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=\"],\"id\":1}");
+                        + "\"latest\"],\"id\":1}");
+    }
+
+    @Test
+    public void testPrivGetLogs() throws Exception {
+        web3j.privGetLogs(
+                        MOCK_PRIVACY_GROUP_ID.toString(),
+                        new EthFilter()
+                                .addSingleTopic(
+                                        "0x000000000000000000000000a94f5374fce5edbc8e2a8697c15331677e6ebf0b"))
+                .send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getLogs\","
+                        + "\"params\":[\"DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=\""
+                        + ",{\"topics\":[\"0x000000000000000000000000a94f5374fce5edbc8e2a8697c15331677e6ebf0b\"]}],"
+                        + "\"id\":1}");
+    }
+
+    @Test
+    public void testPrivNewFilter() throws Exception {
+        EthFilter ethFilter = new EthFilter().addSingleTopic("0x12341234");
+
+        web3j.privNewFilter(MOCK_PRIVACY_GROUP_ID.toString(), ethFilter).send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"priv_newFilter\","
+                        + "\"params\":[\"DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=\",{\"topics\":[\"0x12341234\"]}],\"id\":1}");
+    }
+
+    @Test
+    public void testPrivUninstallFilter() throws Exception {
+        web3j.privUninstallFilter(
+                        MOCK_PRIVACY_GROUP_ID.toString(), "0x13e9b67497fa859338ecba166752591b")
+                .send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"priv_uninstallFilter\","
+                        + "\"params\":[\"DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=\",\"0x13e9b67497fa859338ecba166752591b\"],\"id\":1}");
+    }
+
+    @Test
+    public void testPrivGetFilterChanges() throws Exception {
+        web3j.privGetFilterChanges(
+                        MOCK_PRIVACY_GROUP_ID.toString(), "0x13e9b67497fa859338ecba166752591b")
+                .send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getFilterChanges\","
+                        + "\"params\":[\"DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=\",\"0x13e9b67497fa859338ecba166752591b\"],\"id\":1}");
+    }
+
+    @Test
+    public void testPrivGetFilterLogs() throws Exception {
+        web3j.privGetFilterLogs(
+                        MOCK_PRIVACY_GROUP_ID.toString(), "0x13e9b67497fa859338ecba166752591b")
+                .send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"priv_getFilterLogs\","
+                        + "\"params\":[\"DyAOiF/ynpc+JXa2YAGB0bCitSlOMNm+ShmB/7M6C4w=\",\"0x13e9b67497fa859338ecba166752591b\"],\"id\":1}");
     }
 }

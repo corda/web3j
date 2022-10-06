@@ -23,6 +23,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.web3j.TempFileProvider;
@@ -40,6 +41,7 @@ import org.web3j.abi.datatypes.generated.StaticArray3;
 import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint64;
 import org.web3j.protocol.core.methods.response.AbiDefinition;
+import org.web3j.protocol.core.methods.response.AbiDefinition.NamedType;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -54,16 +56,21 @@ import static org.web3j.codegen.SolidityFunctionWrapper.getNativeType;
 public class SolidityFunctionWrapperTest extends TempFileProvider {
 
     private SolidityFunctionWrapper solidityFunctionWrapper;
+    private SolidityFunctionWrapper solidityFunctionWrapperBoth;
 
     private GenerationReporter generationReporter;
 
     @Override
+    @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
         generationReporter = mock(GenerationReporter.class);
         solidityFunctionWrapper =
                 new SolidityFunctionWrapper(
                         true, false, false, Address.DEFAULT_LENGTH, generationReporter);
+        solidityFunctionWrapperBoth =
+                new SolidityFunctionWrapper(
+                        true, false, true, Address.DEFAULT_LENGTH, generationReporter);
     }
 
     @Test
@@ -170,7 +177,7 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         AbiDefinition functionDefinition =
                 new AbiDefinition(
                         false,
-                        Arrays.asList(new AbiDefinition.NamedType("param", "uint8")),
+                        Arrays.asList(new NamedType("param", "uint8")),
                         "functionName",
                         Collections.emptyList(),
                         "type",
@@ -195,9 +202,9 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         AbiDefinition functionDefinition =
                 new AbiDefinition(
                         false,
-                        Arrays.asList(new AbiDefinition.NamedType("param", "uint8")),
+                        Arrays.asList(new NamedType("param", "uint8")),
                         "functionName",
-                        Arrays.asList(new AbiDefinition.NamedType("result", "uint8")),
+                        Arrays.asList(new NamedType("result", "uint8")),
                         "type",
                         false);
 
@@ -214,7 +221,7 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         AbiDefinition functionDefinition =
                 new AbiDefinition(
                         false,
-                        Arrays.asList(new AbiDefinition.NamedType("param", "uint8")),
+                        Arrays.asList(new NamedType("param", "uint8")),
                         "functionName",
                         Collections.emptyList(),
                         "type",
@@ -239,9 +246,9 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         AbiDefinition functionDefinition =
                 new AbiDefinition(
                         true,
-                        Arrays.asList(new AbiDefinition.NamedType("param", "uint8")),
+                        Arrays.asList(new NamedType("param", "uint8")),
                         "functionName",
-                        Arrays.asList(new AbiDefinition.NamedType("result", "int8")),
+                        Arrays.asList(new NamedType("result", "int8")),
                         "type",
                         false);
 
@@ -263,9 +270,9 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         AbiDefinition functionDefinition =
                 new AbiDefinition(
                         true,
-                        Arrays.asList(new AbiDefinition.NamedType("param", "uint8")),
+                        Arrays.asList(new NamedType("param", "uint8")),
                         "functionName",
-                        Arrays.asList(new AbiDefinition.NamedType("result", "address[]")),
+                        Arrays.asList(new NamedType("result", "address[]")),
                         "type",
                         false);
 
@@ -295,9 +302,9 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         AbiDefinition functionDefinition =
                 new AbiDefinition(
                         true,
-                        Arrays.asList(new AbiDefinition.NamedType("param", "uint8[]")),
+                        Arrays.asList(new NamedType("param", "uint8[]")),
                         "functionName",
-                        Arrays.asList(new AbiDefinition.NamedType("result", "address[]")),
+                        Arrays.asList(new NamedType("result", "address[]")),
                         "type",
                         false);
 
@@ -329,9 +336,9 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
         AbiDefinition functionDefinition =
                 new AbiDefinition(
                         true,
-                        Arrays.asList(new AbiDefinition.NamedType("param", "uint8[][]")),
+                        Arrays.asList(new NamedType("param", "uint8[][]")),
                         "functionName",
-                        Arrays.asList(new AbiDefinition.NamedType("result", "address[]")),
+                        Arrays.asList(new NamedType("result", "address[]")),
                         "type",
                         false);
 
@@ -360,11 +367,242 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
     }
 
     @Test
+    public void testBuildFunctionStructArrayParameterAndReturn() throws Exception {
+        AbiDefinition functionDefinition =
+                new AbiDefinition(
+                        true,
+                        Arrays.asList(
+                                new NamedType(
+                                        "a",
+                                        "tuple[3]",
+                                        Arrays.asList(
+                                                new NamedType(
+                                                        "nuu",
+                                                        "tuple",
+                                                        Arrays.asList(
+                                                                new NamedType(
+                                                                        "foo",
+                                                                        "tuple",
+                                                                        Arrays.asList(
+                                                                                new NamedType(
+                                                                                        "id",
+                                                                                        "string",
+                                                                                        null,
+                                                                                        "string",
+                                                                                        false),
+                                                                                new NamedType(
+                                                                                        "name",
+                                                                                        "string",
+                                                                                        null,
+                                                                                        "string",
+                                                                                        false)),
+                                                                        "struct ComplexStorage.Foo",
+                                                                        false)),
+                                                        "struct ComplexStorage.Nuu",
+                                                        false)),
+                                        "struct ComplexStorage.Nar[3]",
+                                        false),
+                                new NamedType(
+                                        "b",
+                                        "tuple[3]",
+                                        Arrays.asList(
+                                                new NamedType(
+                                                        "id", "uint256", null, "uint256", false),
+                                                new NamedType(
+                                                        "data", "uint256", null, "uint256", false)),
+                                        "struct ComplexStorage.Bar[3]",
+                                        false),
+                                new NamedType(
+                                        "c",
+                                        "tuple[]",
+                                        Arrays.asList(
+                                                new NamedType(
+                                                        "id", "string", null, "string", false),
+                                                new NamedType(
+                                                        "name", "string", null, "string", false)),
+                                        "struct ComplexStorage.Foo[]",
+                                        false),
+                                new NamedType(
+                                        "d",
+                                        "tuple[]",
+                                        Arrays.asList(
+                                                new NamedType(
+                                                        "nuu",
+                                                        "tuple",
+                                                        Arrays.asList(
+                                                                new NamedType(
+                                                                        "foo",
+                                                                        "tuple",
+                                                                        Arrays.asList(
+                                                                                new NamedType(
+                                                                                        "id",
+                                                                                        "string",
+                                                                                        null,
+                                                                                        "string",
+                                                                                        false),
+                                                                                new NamedType(
+                                                                                        "name",
+                                                                                        "string",
+                                                                                        null,
+                                                                                        "string",
+                                                                                        false)),
+                                                                        "struct ComplexStorage.Foo",
+                                                                        false)),
+                                                        "struct ComplexStorage.Nuu",
+                                                        false)),
+                                        "struct ComplexStorage.Nar[]",
+                                        false),
+                                new NamedType(
+                                        "e",
+                                        "tuple[3]",
+                                        Arrays.asList(
+                                                new NamedType(
+                                                        "id", "string", null, "string", false),
+                                                new NamedType(
+                                                        "name", "string", null, "string", false)),
+                                        "struct ComplexStorage.Foo[3]",
+                                        false)),
+                        "idNarBarFooArrays",
+                        Arrays.asList(
+                                new NamedType(
+                                        "",
+                                        "tuple[3]",
+                                        Arrays.asList(
+                                                new NamedType(
+                                                        "nuu",
+                                                        "tuple",
+                                                        Arrays.asList(
+                                                                new NamedType(
+                                                                        "foo",
+                                                                        "tuple",
+                                                                        Arrays.asList(
+                                                                                new NamedType(
+                                                                                        "id",
+                                                                                        "string",
+                                                                                        null,
+                                                                                        "string",
+                                                                                        false),
+                                                                                new NamedType(
+                                                                                        "name",
+                                                                                        "string",
+                                                                                        null,
+                                                                                        "string",
+                                                                                        false)),
+                                                                        "struct ComplexStorage.Foo",
+                                                                        false)),
+                                                        "struct ComplexStorage.Nuu",
+                                                        false)),
+                                        "struct ComplexStorage.Nar[3]",
+                                        false),
+                                new NamedType(
+                                        "",
+                                        "tuple[3]",
+                                        Arrays.asList(
+                                                new NamedType(
+                                                        "id", "uint256", null, "uint256", false),
+                                                new NamedType(
+                                                        "data", "uint256", null, "uint256", false)),
+                                        "struct ComplexStorage.Bar[3]",
+                                        false),
+                                new NamedType(
+                                        "",
+                                        "tuple[]",
+                                        Arrays.asList(
+                                                new NamedType(
+                                                        "id", "string", null, "string", false),
+                                                new NamedType(
+                                                        "name", "string", null, "string", false)),
+                                        "struct ComplexStorage.Foo[]",
+                                        false),
+                                new NamedType(
+                                        "",
+                                        "tuple[]",
+                                        Arrays.asList(
+                                                new NamedType(
+                                                        "nuu",
+                                                        "tuple",
+                                                        Arrays.asList(
+                                                                new NamedType(
+                                                                        "foo",
+                                                                        "tuple",
+                                                                        Arrays.asList(
+                                                                                new NamedType(
+                                                                                        "id",
+                                                                                        "string",
+                                                                                        null,
+                                                                                        "string",
+                                                                                        false),
+                                                                                new NamedType(
+                                                                                        "name",
+                                                                                        "string",
+                                                                                        null,
+                                                                                        "string",
+                                                                                        false)),
+                                                                        "struct ComplexStorage.Foo",
+                                                                        false)),
+                                                        "struct ComplexStorage.Nuu",
+                                                        false)),
+                                        "struct ComplexStorage.Nar[]",
+                                        false),
+                                new NamedType(
+                                        "",
+                                        "tuple[3]",
+                                        Arrays.asList(
+                                                new NamedType(
+                                                        "id", "string", null, "string", false),
+                                                new NamedType(
+                                                        "name", "string", null, "string", false)),
+                                        "struct ComplexStorage.Foo[3]",
+                                        false)),
+                        "function",
+                        false,
+                        "pure");
+
+        MethodSpec methodSpec = solidityFunctionWrapper.buildFunction(functionDefinition);
+
+        String expected =
+                "public org.web3j.protocol.core.RemoteFunctionCall<org.web3j.tuples.generated.Tuple5<java.util.List<Nar>, java.util.List<Bar>, java.util.List<Foo>, java.util.List<Nar>, java.util.List<Foo>>> idNarBarFooArrays(java.util.List<Nar> a, java.util.List<Bar> b, java.util.List<Foo> c, java.util.List<Nar> d, java.util.List<Foo> e) {\n"
+                        + "  final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_IDNARBARFOOARRAYS, \n"
+                        + "      java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(new org.web3j.abi.datatypes.generated.StaticArray3<Nar>(\n"
+                        + "              Nar.class,\n"
+                        + "              org.web3j.abi.Utils.typeMap(a, Nar.class)), \n"
+                        + "      new org.web3j.abi.datatypes.generated.StaticArray3<Bar>(\n"
+                        + "              Bar.class,\n"
+                        + "              org.web3j.abi.Utils.typeMap(b, Bar.class)), \n"
+                        + "      new org.web3j.abi.datatypes.DynamicArray<Foo>(\n"
+                        + "              Foo.class,\n"
+                        + "              org.web3j.abi.Utils.typeMap(c, Foo.class)), \n"
+                        + "      new org.web3j.abi.datatypes.DynamicArray<Nar>(\n"
+                        + "              Nar.class,\n"
+                        + "              org.web3j.abi.Utils.typeMap(d, Nar.class)), \n"
+                        + "      new org.web3j.abi.datatypes.generated.StaticArray3<Foo>(\n"
+                        + "              Foo.class,\n"
+                        + "              org.web3j.abi.Utils.typeMap(e, Foo.class))), \n"
+                        + "      java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.generated.StaticArray3<Nar>>() {}, new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.generated.StaticArray3<Bar>>() {}, new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.DynamicArray<Foo>>() {}, new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.DynamicArray<Nar>>() {}, new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.generated.StaticArray3<Foo>>() {}));\n"
+                        + "  return new org.web3j.protocol.core.RemoteFunctionCall<org.web3j.tuples.generated.Tuple5<java.util.List<Nar>, java.util.List<Bar>, java.util.List<Foo>, java.util.List<Nar>, java.util.List<Foo>>>(function,\n"
+                        + "      new java.util.concurrent.Callable<org.web3j.tuples.generated.Tuple5<java.util.List<Nar>, java.util.List<Bar>, java.util.List<Foo>, java.util.List<Nar>, java.util.List<Foo>>>() {\n"
+                        + "        @java.lang.Override\n"
+                        + "        public org.web3j.tuples.generated.Tuple5<java.util.List<Nar>, java.util.List<Bar>, java.util.List<Foo>, java.util.List<Nar>, java.util.List<Foo>> call() throws java.lang.Exception {\n"
+                        + "          java.util.List<org.web3j.abi.datatypes.Type> results = executeCallMultipleValueReturn(function);\n"
+                        + "          return new org.web3j.tuples.generated.Tuple5<java.util.List<Nar>, java.util.List<Bar>, java.util.List<Foo>, java.util.List<Nar>, java.util.List<Foo>>(\n"
+                        + "              convertToNative((java.util.List<Nar>) results.get(0).getValue()), \n"
+                        + "              convertToNative((java.util.List<Bar>) results.get(1).getValue()), \n"
+                        + "              convertToNative((java.util.List<Foo>) results.get(2).getValue()), \n"
+                        + "              convertToNative((java.util.List<Nar>) results.get(3).getValue()), \n"
+                        + "              convertToNative((java.util.List<Foo>) results.get(4).getValue()));\n"
+                        + "        }\n"
+                        + "      });\n"
+                        + "}\n";
+
+        assertEquals(expected, methodSpec.toString());
+    }
+
+    @Test
     public void testBuildFunctionConstantInvalid() throws Exception {
         AbiDefinition functionDefinition =
                 new AbiDefinition(
                         true,
-                        Collections.singletonList(new AbiDefinition.NamedType("param", "uint8")),
+                        Collections.singletonList(new NamedType("param", "uint8")),
                         "functionName",
                         Collections.emptyList(),
                         "type",
@@ -381,12 +619,12 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
                 new AbiDefinition(
                         true,
                         Arrays.asList(
-                                new AbiDefinition.NamedType("param1", "uint8"),
-                                new AbiDefinition.NamedType("param2", "uint32")),
+                                new NamedType("param1", "uint8"),
+                                new NamedType("param2", "uint32")),
                         "functionName",
                         Arrays.asList(
-                                new AbiDefinition.NamedType("result1", "int8"),
-                                new AbiDefinition.NamedType("result2", "int32")),
+                                new NamedType("result1", "int8"),
+                                new NamedType("result2", "int32")),
                         "type",
                         false);
 
@@ -416,11 +654,11 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
     @Test
     public void testBuildEventConstantMultipleValueReturn() throws Exception {
 
-        AbiDefinition.NamedType id = new AbiDefinition.NamedType("id", "string", true);
-        AbiDefinition.NamedType fromAddress = new AbiDefinition.NamedType("from", "address");
-        AbiDefinition.NamedType toAddress = new AbiDefinition.NamedType("to", "address");
-        AbiDefinition.NamedType value = new AbiDefinition.NamedType("value", "uint256");
-        AbiDefinition.NamedType message = new AbiDefinition.NamedType("message", "string");
+        NamedType id = new NamedType("id", "string", true);
+        NamedType fromAddress = new NamedType("from", "address");
+        NamedType toAddress = new NamedType("to", "address");
+        NamedType value = new NamedType("value", "uint256");
+        NamedType message = new NamedType("message", "string");
         fromAddress.setIndexed(true);
         toAddress.setIndexed(true);
 
@@ -497,11 +735,67 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
     }
 
     @Test
+    public void testBuildEventWithNativeList() throws Exception {
+
+        NamedType array = new NamedType("array", "uint256[]");
+
+        AbiDefinition functionDefinition =
+                new AbiDefinition(
+                        false, Arrays.asList(array), "Transfer", new ArrayList<>(), "event", false);
+        TypeSpec.Builder builder = TypeSpec.classBuilder("testClass");
+
+        builder.addMethods(
+                solidityFunctionWrapper.buildEventFunctions(functionDefinition, builder));
+
+        String expected =
+                "class testClass {\n"
+                        + "  public static final org.web3j.abi.datatypes.Event TRANSFER_EVENT = new org.web3j.abi.datatypes.Event(\"Transfer\", \n"
+                        + "      java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.generated.Uint256>>() {}));\n  ;\n\n"
+                        + "  public java.util.List<TransferEventResponse> getTransferEvents(org.web3j.protocol.core.methods.response.TransactionReceipt transactionReceipt) {\n"
+                        + "    java.util.List<org.web3j.tx.Contract.EventValuesWithLog> valueList = extractEventParametersWithLog(TRANSFER_EVENT, transactionReceipt);\n"
+                        + "    java.util.ArrayList<TransferEventResponse> responses = new java.util.ArrayList<TransferEventResponse>(valueList.size());\n"
+                        + "    for (org.web3j.tx.Contract.EventValuesWithLog eventValues : valueList) {\n"
+                        + "      TransferEventResponse typedResponse = new TransferEventResponse();\n"
+                        + "      typedResponse.log = eventValues.getLog();\n"
+                        + "      typedResponse.array = (java.util.List<java.math.BigInteger>) ((org.web3j.abi.datatypes.Array) eventValues.getNonIndexedValues().get(0)).getNativeValueCopy();\n"
+                        + "      responses.add(typedResponse);\n"
+                        + "    }\n"
+                        + "    return responses;\n"
+                        + "  }\n"
+                        + "\n"
+                        + "  public io.reactivex.Flowable<TransferEventResponse> transferEventFlowable(org.web3j.protocol.core.methods.request.EthFilter filter) {\n"
+                        + "    return web3j.ethLogFlowable(filter).map(new io.reactivex.functions.Function<org.web3j.protocol.core.methods.response.Log, TransferEventResponse>() {\n"
+                        + "      @java.lang.Override\n"
+                        + "      public TransferEventResponse apply(org.web3j.protocol.core.methods.response.Log log) {\n"
+                        + "        org.web3j.tx.Contract.EventValuesWithLog eventValues = extractEventParametersWithLog(TRANSFER_EVENT, log);\n"
+                        + "        TransferEventResponse typedResponse = new TransferEventResponse();\n"
+                        + "        typedResponse.log = log;\n"
+                        + "        typedResponse.array = (java.util.List<java.math.BigInteger>) ((org.web3j.abi.datatypes.Array) eventValues.getNonIndexedValues().get(0)).getNativeValueCopy();\n"
+                        + "        return typedResponse;\n"
+                        + "      }\n"
+                        + "    });\n"
+                        + "  }\n"
+                        + "\n"
+                        + "  public io.reactivex.Flowable<TransferEventResponse> transferEventFlowable(org.web3j.protocol.core.DefaultBlockParameter startBlock, org.web3j.protocol.core.DefaultBlockParameter endBlock) {\n"
+                        + "    org.web3j.protocol.core.methods.request.EthFilter filter = new org.web3j.protocol.core.methods.request.EthFilter(startBlock, endBlock, getContractAddress());\n"
+                        + "    filter.addSingleTopic(org.web3j.abi.EventEncoder.encode(TRANSFER_EVENT));\n"
+                        + "    return transferEventFlowable(filter);\n"
+                        + "  }\n"
+                        + "\n"
+                        + "  public static class TransferEventResponse extends org.web3j.protocol.core.methods.response.BaseEventResponse {\n"
+                        + "    public java.util.List<java.math.BigInteger> array;\n"
+                        + "  }\n"
+                        + "}\n";
+
+        assertEquals(builder.build().toString(), (expected));
+    }
+
+    @Test
     public void testBuildFuncNameConstants() throws Exception {
         AbiDefinition functionDefinition =
                 new AbiDefinition(
                         false,
-                        Arrays.asList(new AbiDefinition.NamedType("param", "uint8")),
+                        Arrays.asList(new NamedType("param", "uint8")),
                         "functionName",
                         Collections.emptyList(),
                         "function",
@@ -518,5 +812,77 @@ public class SolidityFunctionWrapperTest extends TempFileProvider {
                         + "}\n";
 
         assertEquals(builder.build().toString(), (expected));
+    }
+
+    @Test
+    public void testBuildFunctionTransactionAndCall() throws Exception {
+        AbiDefinition functionDefinition =
+                new AbiDefinition(
+                        false,
+                        Arrays.asList(new NamedType("param", "uint8")),
+                        "functionName",
+                        Arrays.asList(new NamedType("result", "int8")),
+                        "type",
+                        false);
+
+        List<MethodSpec> methodSpecs =
+                solidityFunctionWrapperBoth.buildFunctions(functionDefinition);
+
+        String expectedSend =
+                "public org.web3j.protocol.core.RemoteFunctionCall<org.web3j.protocol.core.methods.response.TransactionReceipt> send_functionName(java.math.BigInteger param) {\n"
+                        + "  final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(\n"
+                        + "      FUNC_FUNCTIONNAME, \n"
+                        + "      java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(new org.web3j.abi.datatypes.generated.Uint8(param)), \n"
+                        + "      java.util.Collections.<org.web3j.abi.TypeReference<?>>emptyList());\n"
+                        + "  return executeRemoteCallTransaction(function);\n"
+                        + "}\n";
+
+        String expectedCall =
+                "public org.web3j.protocol.core.RemoteFunctionCall<java.math.BigInteger> call_functionName(java.math.BigInteger param) {\n"
+                        + "  final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_FUNCTIONNAME, \n"
+                        + "      java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(new org.web3j.abi.datatypes.generated.Uint8(param)), \n"
+                        + "      java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.generated.Int8>() {}));\n"
+                        + "  return executeRemoteCallSingleValueReturn(function, java.math.BigInteger.class);\n"
+                        + "}\n";
+
+        assertEquals(2, methodSpecs.size());
+        assertEquals(expectedSend, methodSpecs.get(0).toString());
+        assertEquals(expectedCall, methodSpecs.get(1).toString());
+    }
+
+    @Test
+    public void testBuildFunctionConstantSingleValueReturnAndTransaction() throws Exception {
+        AbiDefinition functionDefinition =
+                new AbiDefinition(
+                        true,
+                        Arrays.asList(new NamedType("param", "uint8")),
+                        "functionName",
+                        Arrays.asList(new NamedType("result", "int8")),
+                        "type",
+                        false);
+
+        List<MethodSpec> methodSpecs =
+                solidityFunctionWrapperBoth.buildFunctions(functionDefinition);
+
+        String expectedCall =
+                "public org.web3j.protocol.core.RemoteFunctionCall<java.math.BigInteger> call_functionName(java.math.BigInteger param) {\n"
+                        + "  final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(FUNC_FUNCTIONNAME, \n"
+                        + "      java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(new org.web3j.abi.datatypes.generated.Uint8(param)), \n"
+                        + "      java.util.Arrays.<org.web3j.abi.TypeReference<?>>asList(new org.web3j.abi.TypeReference<org.web3j.abi.datatypes.generated.Int8>() {}));\n"
+                        + "  return executeRemoteCallSingleValueReturn(function, java.math.BigInteger.class);\n"
+                        + "}\n";
+
+        String expectedSend =
+                "public org.web3j.protocol.core.RemoteFunctionCall<org.web3j.protocol.core.methods.response.TransactionReceipt> send_functionName(java.math.BigInteger param) {\n"
+                        + "  final org.web3j.abi.datatypes.Function function = new org.web3j.abi.datatypes.Function(\n"
+                        + "      FUNC_FUNCTIONNAME, \n"
+                        + "      java.util.Arrays.<org.web3j.abi.datatypes.Type>asList(new org.web3j.abi.datatypes.generated.Uint8(param)), \n"
+                        + "      java.util.Collections.<org.web3j.abi.TypeReference<?>>emptyList());\n"
+                        + "  return executeRemoteCallTransaction(function);\n"
+                        + "}\n";
+
+        assertEquals(2, methodSpecs.size());
+        assertEquals(expectedCall, methodSpecs.get(0).toString());
+        assertEquals(expectedSend, methodSpecs.get(1).toString());
     }
 }

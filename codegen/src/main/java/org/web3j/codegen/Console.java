@@ -27,4 +27,8 @@ public class Console {
         System.out.println(message);
         System.exit(0);
     }
+
+    public static void exitSuccess() {
+        System.exit(0);
+    }
 }

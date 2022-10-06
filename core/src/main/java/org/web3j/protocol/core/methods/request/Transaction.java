@@ -39,6 +39,9 @@ public class Transaction {
     private BigInteger value;
     private String data;
     private BigInteger nonce; // nonce field is not present on eth_call/eth_estimateGas
+    private Long chainId;
+    private BigInteger maxPriorityFeePerGas;
+    private BigInteger maxFeePerGas;
 
     public Transaction(
             String from,
@@ -48,6 +51,21 @@ public class Transaction {
             String to,
             BigInteger value,
             String data) {
+        this(from, nonce, gasPrice, gasLimit, to, value, data, null, null, null);
+    }
+
+    public Transaction(
+            String from,
+            BigInteger nonce,
+            BigInteger gasPrice,
+            BigInteger gasLimit,
+            String to,
+            BigInteger value,
+            String data,
+            Long chainId,
+            BigInteger maxPriorityFeePerGas,
+            BigInteger maxFeePerGas) {
+        this.chainId = chainId;
         this.from = from;
         this.to = to;
         this.gas = gasLimit;
@@ -59,6 +77,8 @@ public class Transaction {
         }
 
         this.nonce = nonce;
+        this.maxPriorityFeePerGas = maxPriorityFeePerGas;
+        this.maxFeePerGas = maxFeePerGas;
     }
 
     public static Transaction createContractTransaction(
@@ -143,6 +163,22 @@ public class Transaction {
 
     public String getNonce() {
         return convert(nonce);
+    }
+
+    public String getChainId() {
+        if (chainId != null) {
+            return convert(BigInteger.valueOf(chainId));
+        } else {
+            return null;
+        }
+    }
+
+    public String getMaxPriorityFeePerGas() {
+        return convert(maxPriorityFeePerGas);
+    }
+
+    public String getMaxFeePerGas() {
+        return convert(maxFeePerGas);
     }
 
     private static String convert(BigInteger value) {

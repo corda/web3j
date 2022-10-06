@@ -17,6 +17,7 @@ import java.math.BigInteger;
 
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.service.TxSignService;
 import org.web3j.tx.response.TransactionReceiptProcessor;
 
 /**
@@ -27,8 +28,14 @@ public class FastRawTransactionManager extends RawTransactionManager {
 
     private volatile BigInteger nonce = BigInteger.valueOf(-1);
 
-    public FastRawTransactionManager(Web3j web3j, Credentials credentials, byte chainId) {
+    public FastRawTransactionManager(Web3j web3j, Credentials credentials, long chainId) {
         super(web3j, credentials, chainId);
+    }
+
+    public FastRawTransactionManager(
+            Web3j web3j, TxSignService txSignService, long chainId, BigInteger nonce) {
+        super(web3j, txSignService, chainId);
+        this.nonce = nonce;
     }
 
     public FastRawTransactionManager(Web3j web3j, Credentials credentials) {
@@ -45,7 +52,7 @@ public class FastRawTransactionManager extends RawTransactionManager {
     public FastRawTransactionManager(
             Web3j web3j,
             Credentials credentials,
-            byte chainId,
+            long chainId,
             TransactionReceiptProcessor transactionReceiptProcessor) {
         super(web3j, credentials, chainId, transactionReceiptProcessor);
     }

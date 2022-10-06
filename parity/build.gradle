@@ -1,4 +1,3 @@
-
 description 'Parity JSON-RPC API'
 
 dependencies {

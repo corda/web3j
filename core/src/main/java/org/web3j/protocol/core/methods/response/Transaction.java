@@ -13,18 +13,18 @@
 package org.web3j.protocol.core.methods.response;
 
 import java.math.BigInteger;
+import java.util.List;
 
+import org.web3j.crypto.TransactionUtils;
 import org.web3j.utils.Numeric;
 
 /** Transaction object used by both {@link EthTransaction} and {@link EthBlock}. */
 public class Transaction {
-    private static final int CHAIN_ID_INC = 35;
-    private static final int LOWER_REAL_V = 27;
-
     private String hash;
     private String nonce;
     private String blockHash;
     private String blockNumber;
+    private String chainId;
     private String transactionIndex;
     private String from;
     private String to;
@@ -38,9 +38,15 @@ public class Transaction {
     private String r;
     private String s;
     private long v; // see https://github.com/web3j/web3j/issues/44
+    private String type;
+    private String maxFeePerGas;
+    private String maxPriorityFeePerGas;
+    private List<AccessListObject> accessList;
 
     public Transaction() {}
 
+    /** Use constructor with ChainId */
+    @Deprecated
     public Transaction(
             String hash,
             String nonce,
@@ -58,7 +64,11 @@ public class Transaction {
             String raw,
             String r,
             String s,
-            long v) {
+            long v,
+            String type,
+            String maxFeePerGas,
+            String maxPriorityFeePerGas,
+            List accessList) {
         this.hash = hash;
         this.nonce = nonce;
         this.blockHash = blockHash;
@@ -76,6 +86,61 @@ public class Transaction {
         this.r = r;
         this.s = s;
         this.v = v;
+        this.type = type;
+        this.maxFeePerGas = maxFeePerGas;
+        this.maxPriorityFeePerGas = maxPriorityFeePerGas;
+        this.accessList = accessList;
+    }
+
+    public Transaction(
+            String hash,
+            String nonce,
+            String blockHash,
+            String blockNumber,
+            String chainId,
+            String transactionIndex,
+            String from,
+            String to,
+            String value,
+            String gas,
+            String gasPrice,
+            String input,
+            String creates,
+            String publicKey,
+            String raw,
+            String r,
+            String s,
+            long v,
+            String type,
+            String maxFeePerGas,
+            String maxPriorityFeePerGas,
+            List accessList) {
+        this.hash = hash;
+        this.nonce = nonce;
+        this.blockHash = blockHash;
+        this.blockNumber = blockNumber;
+        this.chainId = chainId;
+        this.transactionIndex = transactionIndex;
+        this.from = from;
+        this.to = to;
+        this.value = value;
+        this.gasPrice = gasPrice;
+        this.gas = gas;
+        this.input = input;
+        this.creates = creates;
+        this.publicKey = publicKey;
+        this.raw = raw;
+        this.r = r;
+        this.s = s;
+        this.v = v;
+        this.type = type;
+        this.maxFeePerGas = maxFeePerGas;
+        this.maxPriorityFeePerGas = maxPriorityFeePerGas;
+        this.accessList = accessList;
+    }
+
+    public void setChainId(String chainId) {
+        this.chainId = chainId;
     }
 
     public String getHash() {
@@ -90,12 +155,12 @@ public class Transaction {
         return Numeric.decodeQuantity(nonce);
     }
 
-    public String getNonceRaw() {
-        return nonce;
-    }
-
     public void setNonce(String nonce) {
         this.nonce = nonce;
+    }
+
+    public String getNonceRaw() {
+        return nonce;
     }
 
     public String getBlockHash() {
@@ -110,24 +175,24 @@ public class Transaction {
         return Numeric.decodeQuantity(blockNumber);
     }
 
-    public String getBlockNumberRaw() {
-        return blockNumber;
-    }
-
     public void setBlockNumber(String blockNumber) {
         this.blockNumber = blockNumber;
+    }
+
+    public String getBlockNumberRaw() {
+        return blockNumber;
     }
 
     public BigInteger getTransactionIndex() {
         return Numeric.decodeQuantity(transactionIndex);
     }
 
-    public String getTransactionIndexRaw() {
-        return transactionIndex;
-    }
-
     public void setTransactionIndex(String transactionIndex) {
         this.transactionIndex = transactionIndex;
+    }
+
+    public String getTransactionIndexRaw() {
+        return transactionIndex;
     }
 
     public String getFrom() {
@@ -150,36 +215,36 @@ public class Transaction {
         return Numeric.decodeQuantity(value);
     }
 
-    public String getValueRaw() {
-        return value;
-    }
-
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getValueRaw() {
+        return value;
     }
 
     public BigInteger getGasPrice() {
         return Numeric.decodeQuantity(gasPrice);
     }
 
-    public String getGasPriceRaw() {
-        return gasPrice;
-    }
-
     public void setGasPrice(String gasPrice) {
         this.gasPrice = gasPrice;
+    }
+
+    public String getGasPriceRaw() {
+        return gasPrice;
     }
 
     public BigInteger getGas() {
         return Numeric.decodeQuantity(gas);
     }
 
-    public String getGasRaw() {
-        return gas;
-    }
-
     public void setGas(String gas) {
         this.gas = gas;
+    }
+
+    public String getGasRaw() {
+        return gas;
     }
 
     public String getInput() {
@@ -234,29 +299,75 @@ public class Transaction {
         return v;
     }
 
-    public Long getChainId() {
-        if (v == LOWER_REAL_V || v == (LOWER_REAL_V + 1)) {
-            return null;
-        }
-        Long chainId = (v - CHAIN_ID_INC) / 2;
-        return chainId;
-    }
-
-    // public void setV(byte v) {
-    //     this.v = v;
-    // }
-
     // Workaround until Geth & Parity return consistent values. At present
     // Parity returns a byte value, Geth returns a hex-encoded string
     // https://github.com/ethereum/go-ethereum/issues/3339
     public void setV(Object v) {
         if (v instanceof String) {
-            this.v = Numeric.toBigInt((String) v).longValueExact();
+            // longValueExact() is not implemented on android 11 or later only on 12 so it was
+            // replaced with longValue.
+            this.v = Numeric.toBigInt((String) v).longValue();
         } else if (v instanceof Integer) {
             this.v = ((Integer) v).longValue();
         } else {
             this.v = (Long) v;
         }
+    }
+
+    //    public void setV(byte v) {
+    //        this.v = v;
+    //    }
+
+    public Long getChainId() {
+        if (chainId != null) {
+            return Numeric.decodeQuantity(chainId).longValue();
+        }
+
+        return TransactionUtils.deriveChainId(v);
+    }
+
+    public String getChainIdRaw() {
+        return this.chainId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public BigInteger getMaxFeePerGas() {
+        return Numeric.decodeQuantity(maxFeePerGas);
+    }
+
+    public String getMaxFeePerGasRaw() {
+        return maxFeePerGas;
+    }
+
+    public void setMaxFeePerGas(String maxFeePerGas) {
+        this.maxFeePerGas = maxFeePerGas;
+    }
+
+    public String getMaxPriorityFeePerGasRaw() {
+        return maxPriorityFeePerGas;
+    }
+
+    public BigInteger getMaxPriorityFeePerGas() {
+        return Numeric.decodeQuantity(maxPriorityFeePerGas);
+    }
+
+    public void setMaxPriorityFeePerGas(String maxPriorityFeePerGas) {
+        this.maxPriorityFeePerGas = maxPriorityFeePerGas;
+    }
+
+    public List<AccessListObject> getAccessList() {
+        return accessList;
+    }
+
+    public void setAccessList(List<AccessListObject> accessList) {
+        this.accessList = accessList;
     }
 
     @Override
@@ -286,6 +397,13 @@ public class Transaction {
                 : that.getBlockHash() != null) {
             return false;
         }
+
+        if (getChainIdRaw() != null
+                ? !getChainIdRaw().equals(that.getChainIdRaw())
+                : that.getChainIdRaw() != null) {
+            return false;
+        }
+
         if (getBlockNumberRaw() != null
                 ? !getBlockNumberRaw().equals(that.getBlockNumberRaw())
                 : that.getBlockNumberRaw() != null) {
@@ -336,6 +454,24 @@ public class Transaction {
         if (getR() != null ? !getR().equals(that.getR()) : that.getR() != null) {
             return false;
         }
+        if (getType() != null ? !getType().equals(that.getType()) : that.getType() != null) {
+            return false;
+        }
+        if (getMaxFeePerGasRaw() != null
+                ? !getMaxFeePerGasRaw().equals(that.getMaxFeePerGasRaw())
+                : that.getMaxFeePerGasRaw() != null) {
+            return false;
+        }
+        if (getMaxPriorityFeePerGasRaw() != null
+                ? !getMaxPriorityFeePerGasRaw().equals(that.getMaxPriorityFeePerGasRaw())
+                : that.getMaxPriorityFeePerGasRaw() != null) {
+            return false;
+        }
+        if (getAccessList() != null
+                ? !getAccessList().equals(that.getAccessList())
+                : that.getAccessList() != null) {
+            return false;
+        }
         return getS() != null ? getS().equals(that.getS()) : that.getS() == null;
     }
 
@@ -345,6 +481,7 @@ public class Transaction {
         result = 31 * result + (getNonceRaw() != null ? getNonceRaw().hashCode() : 0);
         result = 31 * result + (getBlockHash() != null ? getBlockHash().hashCode() : 0);
         result = 31 * result + (getBlockNumberRaw() != null ? getBlockNumberRaw().hashCode() : 0);
+        result = 31 * result + (getChainIdRaw() != null ? getChainIdRaw().hashCode() : 0);
         result =
                 31 * result
                         + (getTransactionIndexRaw() != null
@@ -362,6 +499,14 @@ public class Transaction {
         result = 31 * result + (getR() != null ? getR().hashCode() : 0);
         result = 31 * result + (getS() != null ? getS().hashCode() : 0);
         result = 31 * result + BigInteger.valueOf(getV()).hashCode();
+        result = 31 * result + (getType() != null ? getType().hashCode() : 0);
+        result = 31 * result + (getMaxFeePerGasRaw() != null ? getMaxFeePerGasRaw().hashCode() : 0);
+        result =
+                31 * result
+                        + (getMaxPriorityFeePerGasRaw() != null
+                                ? getMaxPriorityFeePerGasRaw().hashCode()
+                                : 0);
+        result = 31 * result + (getAccessList() != null ? getAccessList().hashCode() : 0);
         return result;
     }
 }

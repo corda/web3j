@@ -34,6 +34,9 @@ public class TransactionReceipt {
     private String to;
     private List<Log> logs;
     private String logsBloom;
+    private String revertReason;
+    private String type;
+    private String effectiveGasPrice;
 
     public TransactionReceipt() {}
 
@@ -50,7 +53,10 @@ public class TransactionReceipt {
             String from,
             String to,
             List<Log> logs,
-            String logsBloom) {
+            String logsBloom,
+            String revertReason,
+            String type,
+            String effectiveGasPrice) {
         this.transactionHash = transactionHash;
         this.transactionIndex = transactionIndex;
         this.blockHash = blockHash;
@@ -64,6 +70,9 @@ public class TransactionReceipt {
         this.to = to;
         this.logs = logs;
         this.logsBloom = logsBloom;
+        this.revertReason = revertReason;
+        this.type = type;
+        this.effectiveGasPrice = effectiveGasPrice;
     }
 
     public String getTransactionHash() {
@@ -155,10 +164,10 @@ public class TransactionReceipt {
     }
 
     public boolean isStatusOK() {
-        if (null == status) {
+        if (null == getStatus()) {
             return true;
         }
-        BigInteger statusQuantity = Numeric.decodeQuantity(status);
+        BigInteger statusQuantity = Numeric.decodeQuantity(getStatus());
         return BigInteger.ONE.equals(statusQuantity);
     }
 
@@ -192,6 +201,30 @@ public class TransactionReceipt {
 
     public void setLogsBloom(String logsBloom) {
         this.logsBloom = logsBloom;
+    }
+
+    public String getRevertReason() {
+        return revertReason;
+    }
+
+    public void setRevertReason(String revertReason) {
+        this.revertReason = revertReason;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getEffectiveGasPrice() {
+        return effectiveGasPrice;
+    }
+
+    public void setEffectiveGasPrice(String effectiveGasPrice) {
+        this.effectiveGasPrice = effectiveGasPrice;
     }
 
     @Override
@@ -255,9 +288,23 @@ public class TransactionReceipt {
         if (getLogs() != null ? !getLogs().equals(that.getLogs()) : that.getLogs() != null) {
             return false;
         }
-        return getLogsBloom() != null
-                ? getLogsBloom().equals(that.getLogsBloom())
-                : that.getLogsBloom() == null;
+        if (getLogsBloom() != null
+                ? !getLogsBloom().equals(that.getLogsBloom())
+                : that.getLogsBloom() != null) {
+            return false;
+        }
+        if (getType() != null ? !getType().equals(that.getType()) : that.getType() != null) {
+            return false;
+        }
+
+        if (getEffectiveGasPrice() != null
+                ? !getEffectiveGasPrice().equals(that.getEffectiveGasPrice())
+                : that.getEffectiveGasPrice() != null) {
+            return false;
+        }
+        return getRevertReason() != null
+                ? getRevertReason().equals(that.getRevertReason())
+                : that.getRevertReason() == null;
     }
 
     @Override
@@ -275,6 +322,11 @@ public class TransactionReceipt {
         result = 31 * result + (getTo() != null ? getTo().hashCode() : 0);
         result = 31 * result + (getLogs() != null ? getLogs().hashCode() : 0);
         result = 31 * result + (getLogsBloom() != null ? getLogsBloom().hashCode() : 0);
+        result = 31 * result + (getRevertReason() != null ? getRevertReason().hashCode() : 0);
+        result = 31 * result + (getType() != null ? getType().hashCode() : 0);
+        result =
+                31 * result
+                        + (getEffectiveGasPrice() != null ? getEffectiveGasPrice().hashCode() : 0);
         return result;
     }
 
@@ -318,6 +370,15 @@ public class TransactionReceipt {
                 + logs
                 + ", logsBloom='"
                 + logsBloom
+                + '\''
+                + ", revertReason='"
+                + revertReason
+                + '\''
+                + ", type='"
+                + type
+                + '\''
+                + ", effectiveGasPrice='"
+                + effectiveGasPrice
                 + '\''
                 + '}';
     }

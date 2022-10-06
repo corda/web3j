@@ -1,4 +1,3 @@
-
 description 'Geth JSON-RPC API'
 
 dependencies {

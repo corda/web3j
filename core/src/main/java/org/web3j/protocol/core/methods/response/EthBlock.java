@@ -80,6 +80,7 @@ public class EthBlock extends Response<EthBlock.Block> {
         private List<TransactionResult> transactions;
         private List<String> uncles;
         private List<String> sealFields;
+        private String baseFeePerGas;
 
         public Block() {}
 
@@ -105,7 +106,8 @@ public class EthBlock extends Response<EthBlock.Block> {
                 String timestamp,
                 List<TransactionResult> transactions,
                 List<String> uncles,
-                List<String> sealFields) {
+                List<String> sealFields,
+                String baseFeePerGas) {
             this.number = number;
             this.hash = hash;
             this.parentHash = parentHash;
@@ -128,6 +130,7 @@ public class EthBlock extends Response<EthBlock.Block> {
             this.transactions = transactions;
             this.uncles = uncles;
             this.sealFields = sealFields;
+            this.baseFeePerGas = baseFeePerGas;
         }
 
         public BigInteger getNumber() {
@@ -339,6 +342,18 @@ public class EthBlock extends Response<EthBlock.Block> {
             this.sealFields = sealFields;
         }
 
+        public BigInteger getBaseFeePerGas() {
+            return Numeric.decodeQuantity(baseFeePerGas);
+        }
+
+        public void setBaseFeePerGas(String baseFeePerGas) {
+            this.baseFeePerGas = baseFeePerGas;
+        }
+
+        public String getBaseFeePerGasRaw() {
+            return baseFeePerGas;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -453,6 +468,13 @@ public class EthBlock extends Response<EthBlock.Block> {
                     : block.getUncles() != null) {
                 return false;
             }
+
+            if (getBaseFeePerGasRaw() != null
+                    ? !getBaseFeePerGasRaw().equals(block.getBaseFeePerGasRaw())
+                    : block.getBaseFeePerGasRaw() != null) {
+                return false;
+            }
+
             return getSealFields() != null
                     ? getSealFields().equals(block.getSealFields())
                     : block.getSealFields() == null;
@@ -490,6 +512,11 @@ public class EthBlock extends Response<EthBlock.Block> {
             result = 31 * result + (getTransactions() != null ? getTransactions().hashCode() : 0);
             result = 31 * result + (getUncles() != null ? getUncles().hashCode() : 0);
             result = 31 * result + (getSealFields() != null ? getSealFields().hashCode() : 0);
+            result =
+                    31 * result
+                            + (getBaseFeePerGasRaw() != null
+                                    ? getBaseFeePerGasRaw().hashCode()
+                                    : 0);
             return result;
         }
     }
@@ -540,6 +567,8 @@ public class EthBlock extends Response<EthBlock.Block> {
             implements TransactionResult<Transaction> {
         public TransactionObject() {}
 
+        /** Use constructor with ChainId */
+        @Deprecated
         public TransactionObject(
                 String hash,
                 String nonce,
@@ -557,7 +586,11 @@ public class EthBlock extends Response<EthBlock.Block> {
                 String raw,
                 String r,
                 String s,
-                int v) {
+                long v,
+                String type,
+                String maxFeePerGas,
+                String maxPriorityFeePerGas,
+                List<AccessListObject> accessList) {
             super(
                     hash,
                     nonce,
@@ -575,7 +608,59 @@ public class EthBlock extends Response<EthBlock.Block> {
                     raw,
                     r,
                     s,
-                    v);
+                    v,
+                    type,
+                    maxFeePerGas,
+                    maxPriorityFeePerGas,
+                    accessList);
+        }
+
+        public TransactionObject(
+                String hash,
+                String nonce,
+                String blockHash,
+                String blockNumber,
+                String chainId,
+                String transactionIndex,
+                String from,
+                String to,
+                String value,
+                String gasPrice,
+                String gas,
+                String input,
+                String creates,
+                String publicKey,
+                String raw,
+                String r,
+                String s,
+                long v,
+                String type,
+                String maxFeePerGas,
+                String maxPriorityFeePerGas,
+                List<AccessListObject> accessList) {
+            super(
+                    hash,
+                    nonce,
+                    blockHash,
+                    blockNumber,
+                    chainId,
+                    transactionIndex,
+                    from,
+                    to,
+                    value,
+                    gas,
+                    gasPrice,
+                    input,
+                    creates,
+                    publicKey,
+                    raw,
+                    r,
+                    s,
+                    v,
+                    type,
+                    maxFeePerGas,
+                    maxPriorityFeePerGas,
+                    accessList);
         }
 
         @Override

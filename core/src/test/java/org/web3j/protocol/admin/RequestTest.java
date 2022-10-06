@@ -57,12 +57,14 @@ public class RequestTest extends RequestTester {
                                 BigInteger.ONE,
                                 "TO",
                                 BigInteger.ZERO,
-                                "DATA"),
+                                "DATA",
+                                61L,
+                                BigInteger.ZERO,
+                                BigInteger.TEN),
                         "password")
                 .send();
-
         verifyResult(
-                "{\"jsonrpc\":\"2.0\",\"method\":\"personal_sendTransaction\",\"params\":[{\"from\":\"FROM\",\"to\":\"TO\",\"gas\":\"0x1\",\"gasPrice\":\"0xa\",\"value\":\"0x0\",\"data\":\"0xDATA\",\"nonce\":\"0x1\"},\"password\"],\"id\":1}");
+                "{\"jsonrpc\":\"2.0\",\"method\":\"personal_sendTransaction\",\"params\":[{\"from\":\"FROM\",\"to\":\"TO\",\"gas\":\"0x1\",\"gasPrice\":\"0xa\",\"value\":\"0x0\",\"data\":\"0xDATA\",\"nonce\":\"0x1\",\"chainId\":\"0x3d\",\"maxPriorityFeePerGas\":\"0x0\",\"maxFeePerGas\":\"0xa\"},\"password\"],\"id\":1}");
     }
 
     @Test
@@ -85,5 +87,13 @@ public class RequestTest extends RequestTester {
                 "{\"jsonrpc\":\"2.0\",\"method\":\"personal_unlockAccount\","
                         + "\"params\":[\"0xfc390d8a8ddb591b010fda52f4db4945742c3809\",\"hunter2\",null],"
                         + "\"id\":1}");
+    }
+
+    @Test
+    public void testTxPoolContent() throws Exception {
+        web3j.txPoolContent().send();
+
+        verifyResult(
+                "{\"jsonrpc\":\"2.0\",\"method\":\"txpool_content\"," + "\"params\":[],\"id\":1}");
     }
 }

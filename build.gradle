@@ -1,3 +1,8 @@
+buildscript {
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.71"
+    }
+}
 plugins {
     id 'java'
     id 'idea'
@@ -10,9 +15,11 @@ plugins {
 }
 
 ext {
-    bouncycastleVersion = '1.61'
+    bouncycastleVersion = '1.68'
     jacksonVersion = '2.8.5'
-    javapoetVersion = '1.7.0'
+    javaPoetVersion = '1.7.0'
+    kotlinVersion = '1.2.72'
+    kotlinPoetVersion = '1.5.0'
     jnr_unixsocketVersion = '0.21'
     okhttpVersion = '3.8.1'
     rxjavaVersion = '2.2.2'
@@ -64,6 +71,15 @@ allprojects {
 
     tasks.withType(Test) {
         reports.html.destination = file("${reporting.baseDir}/${name}")
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions {
+            languageVersion = "1.2"
+            apiVersion = "1.2"
+            jvmTarget = "1.8"
+            javaParameters = true   // Useful for reflection.
+        }
     }
 
     dependencies {

@@ -21,6 +21,7 @@ import org.web3j.rlp.RlpString;
 import org.web3j.rlp.RlpType;
 import org.web3j.utils.Numeric;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("deprecation")
@@ -59,7 +60,7 @@ public class TransactionEncoderTest {
 
     @Test
     public void testEip155Encode() {
-        assertEquals(
+        assertArrayEquals(
                 TransactionEncoder.encode(createEip155RawTransaction(), (byte) 1),
                 (Numeric.hexStringToByteArray(
                         "0xec098504a817c800825208943535353535353535353535353535353535353535880de0"
@@ -73,13 +74,44 @@ public class TransactionEncoderTest {
                 Credentials.create(
                         "0x4646464646464646464646464646464646464646464646464646464646464646");
 
-        assertEquals(
+        assertArrayEquals(
                 TransactionEncoder.signMessage(createEip155RawTransaction(), (byte) 1, credentials),
                 (Numeric.hexStringToByteArray(
                         "0xf86c098504a817c800825208943535353535353535353535353535353535353535880"
                                 + "de0b6b3a76400008025a028ef61340bd939bc2195fe537567866003e1a15d"
                                 + "3c71ff63e1590620aa636276a067cbe9d8997f761aecb703304b3800ccf55"
                                 + "5c9f3dc64214b297fb1966a3b6d83")));
+    }
+
+    @Test
+    public void testEip155TransactionWithLargeChainId() {
+        // https://github.com/ethereum/EIPs/issues/155
+        Credentials credentials =
+                Credentials.create(
+                        "0x4646464646464646464646464646464646464646464646464646464646464646");
+
+        assertArrayEquals(
+                TransactionEncoder.signMessage(
+                        createEip155RawTransaction(), Long.MAX_VALUE, credentials),
+                (Numeric.hexStringToByteArray(
+                        "0xf875098504a817c800825208943535353535353535353535353535353535353535880de0b6b3a76400008089010000000000000021a0ed14bd16ddd7788623f4439db3ddbc8bf548c241c3af87819c187a638ef40e17a03b4972ee3adb77b6b06784d12fe098c2cb84c03afd79d17b1caf8f63483101f0")));
+    }
+
+    @Test
+    public void testEip1559Transaction() {
+        // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-1559.md
+        Credentials credentials =
+                Credentials.create(
+                        "0x4646464646464646464646464646464646464646464646464646464646464646");
+        assertArrayEquals(
+                TransactionEncoder.signMessage(createEip1559RawTransaction(), credentials),
+                (Numeric.hexStringToByteArray(
+                        "02f8698206178082162e8310c8e082753094627306090abab3a6e1400e9345bc60c78a8bef577b80c001a0d1f9ee3bdde4d4e0792c7089b84059fb28e17f494556d8a775450b1dd6c318a1a038bd3e2fb9e018528e0a41f57c7a32a8d23b2693e0451aa6ef4519b234466e7f")));
+
+        assertArrayEquals(
+                TransactionEncoder.signMessage(createEip1559RawTransaction(), 1559L, credentials),
+                (Numeric.hexStringToByteArray(
+                        "02f8698206178082162e8310c8e082753094627306090abab3a6e1400e9345bc60c78a8bef577b80c001a0d1f9ee3bdde4d4e0792c7089b84059fb28e17f494556d8a775450b1dd6c318a1a038bd3e2fb9e018528e0a41f57c7a32a8d23b2693e0451aa6ef4519b234466e7f")));
     }
 
     private static RawTransaction createEtherTransaction() {
@@ -107,5 +139,16 @@ public class TransactionEncoderTest {
                 BigInteger.valueOf(21000),
                 "0x3535353535353535353535353535353535353535",
                 BigInteger.valueOf(1000000000000000000L));
+    }
+
+    private static RawTransaction createEip1559RawTransaction() {
+        return RawTransaction.createEtherTransaction(
+                1559L,
+                BigInteger.valueOf(0),
+                BigInteger.valueOf(30000),
+                "0x627306090abaB3A6e1400e9345bC60c78a8BEf57",
+                BigInteger.valueOf(123),
+                BigInteger.valueOf(5678),
+                BigInteger.valueOf(1100000));
     }
 }

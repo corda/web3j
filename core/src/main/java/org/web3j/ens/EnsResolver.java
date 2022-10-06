@@ -25,8 +25,9 @@ import org.web3j.tx.ClientTransactionManager;
 import org.web3j.tx.TransactionManager;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Numeric;
+import org.web3j.utils.Strings;
 
-/** Resolution logic for contract addresses. */
+/** Resolution logic for contract addresses. According to https://eips.ethereum.org/EIPS/eip-2544 */
 public class EnsResolver {
 
     public static final long DEFAULT_SYNC_THRESHOLD = 1000 * 60 * 3;
@@ -83,25 +84,31 @@ public class EnsResolver {
         }
     }
 
-    public String resolve(String contractId) {
-        if (isValidEnsName(contractId, addressLength)) {
-            PublicResolver resolver = obtainPublicResolver(contractId);
+    public String resolve(String ensName) {
 
-            byte[] nameHash = NameHash.nameHashAsBytes(contractId);
-            String contractAddress = null;
+        if (Strings.isBlank(ensName) || (ensName.trim().length() == 1 && ensName.contains("."))) {
+            return null;
+        }
+
+        if (isValidEnsName(ensName, addressLength)) {
+            PublicResolver resolver = obtainPublicResolver(ensName);
+
+            byte[] nameHash = NameHash.nameHashAsBytes(ensName);
+            String contractAddress;
             try {
                 contractAddress = resolver.addr(nameHash).send();
             } catch (Exception e) {
-                throw new RuntimeException("Unable to execute Ethereum request", e);
+                throw new RuntimeException(
+                        "ENS resolver exception, unable to execute request: ", e);
             }
 
             if (!WalletUtils.isValidAddress(contractAddress)) {
-                throw new RuntimeException("Unable to resolve address for name: " + contractId);
+                throw new RuntimeException("Unable to resolve address for name: " + ensName);
             } else {
                 return contractAddress;
             }
         } else {
-            return contractId;
+            return ensName;
         }
     }
 
@@ -109,7 +116,7 @@ public class EnsResolver {
      * Reverse name resolution as documented in the <a
      * href="https://docs.ens.domains/contract-api-reference/reverseregistrar">specification</a>.
      *
-     * @param address an ethereum address, example: "0x314159265dd8dbb310642f98f50c066173c1259b"
+     * @param address an ethereum address, example: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e"
      * @return a EnsName registered for provided address
      */
     public String reverseResolve(String address) {
@@ -156,7 +163,7 @@ public class EnsResolver {
         } else {
             EthBlock ethBlock =
                     web3j.ethGetBlockByNumber(DefaultBlockParameterName.LATEST, false).send();
-            long timestamp = ethBlock.getBlock().getTimestamp().longValueExact() * 1000;
+            long timestamp = ethBlock.getBlock().getTimestamp().longValue() * 1000;
 
             return System.currentTimeMillis() - syncThreshold < timestamp;
         }
