@@ -68,7 +68,8 @@ allprojects {
             'java',
             'javadoc',
             'repositories',
-            'spotless'
+            'spotless',
+            'com.jfrog.artifactory'
         ].each { buildScript ->
             from("$rootDir/gradle/$buildScript/build.gradle")
         }
