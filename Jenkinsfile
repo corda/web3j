@@ -3,8 +3,8 @@ pipeline {
     agent {
         docker {
             // Our custom docker image
-            image "build-zulu-openjdk:${dockerLabel}"
-            label "${agentLabel}"
+            image "build-zulu-openjdk:11"
+            label "standard"
             registryUrl 'https://engineering-docker.software.r3.com/'
             registryCredentialsId 'artifactory-credentials'
             // Used to mount storage from the host as a volume to persist the cache between builds
