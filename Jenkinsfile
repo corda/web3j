@@ -20,7 +20,7 @@ pipeline {
         GRADLE_USER_HOME = "/host_tmp/gradle"
         CORDA_ARTIFACTORY_PASSWORD = "${env.ARTIFACTORY_CREDENTIALS_PSW}"
         CORDA_ARTIFACTORY_USERNAME = "${env.ARTIFACTORY_CREDENTIALS_USR}"
-        CORDA_ARTIFACTORY_REPOKEY = "corda-dependencies"
+        CORDA_ARTIFACTORY_REPOKEY = "corda-dependencies-dev"
     }
     options {
         ansiColor('xterm')
@@ -50,7 +50,7 @@ pipeline {
                rtGradleDeployer(
                         id: 'deployer',
                         serverId: 'R3-Artifactory',
-                        repo: 'corda-dependencies'
+                        repo: '${CORDA_ARTIFACTORY_REPOKEY}'
                )
                rtGradleRun(
                         usesPlugin: true,
