@@ -1,35 +1,15 @@
 #!groovy
 pipeline {
     agent {
-        kubernetes {
-            cloud 'kubernetes'
-            inheritFrom 'default'
-            yaml '''\
-                apiVersion: v1
-                kind: Pod
-                spec:
-                    containers:
-                      - name: docker
-                        image: docker:latest
-                        command:
-                            - sleep
-                        args:
-                            - infinity
-                        env:
-                        - name: DOCKER_HOST
-                          value: tcp://localhost:2375
-                      - name: dind
-                        image: docker:18.05-dind
-                        securityContext:
-                          privileged: true
-                        volumeMounts:
-                          - name: dind-storage
-                            mountPath: /var/lib/docker
-                    volumes:
-                      - name: dind-storage
-                        emptyDir: {}
-            '''.stripIndent()
-            defaultContainer 'docker'
+        docker {
+            // Our custom docker image
+            image "build-zulu-openjdk:${dockerLabel}"
+            label "${agentLabel}"
+            registryUrl 'https://engineering-docker.software.r3.com/'
+            registryCredentialsId 'artifactory-credentials'
+            // Used to mount storage from the host as a volume to persist the cache between builds
+            args '-v /tmp:/host_tmp'
+            alwaysPull true
         }
     }
     environment {
