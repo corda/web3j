@@ -60,7 +60,7 @@ description 'Web3j base project.'
     }
 }
 
-
+apply plugin: 'com.jfrog.artifactory'
 
 allprojects {
     apply plugin: 'com.jfrog.artifactory'
