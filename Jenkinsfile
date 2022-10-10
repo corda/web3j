@@ -13,11 +13,14 @@ pipeline {
         }
     }
     environment {
+        ARTIFACTORY_CREDENTIALS = credentials('artifactory-credentials')
         ARTIFACTORY_BUILD_NAME = "Web3j artifact"
         ARTIFACTORY_SERVER = "software.r3.com"
         ARTIFACTORY_REPO_NAME = "corda-dependency"
         ARTIFACTORY_SERVER_ID = 'R3-Artifactory'
-        FULL_IMAGE_NAME = "${env.ARTIFACTORY_REPO_NAME}.${env.ARTIFACTORY_SERVER}/web3j-fork:${env.GIT_COMMIT.substring(0, 7)}"
+        GRADLE_USER_HOME = "/host_tmp/gradle"
+        CORDA_ARTIFACTORY_PASSWORD = "${env.ARTIFACTORY_CREDENTIALS_PSW}"
+        CORDA_ARTIFACTORY_USERNAME = "${env.ARTIFACTORY_CREDENTIALS_USR}"
     }
     options {
         ansiColor('xterm')
@@ -44,7 +47,6 @@ pipeline {
                         captureEnv: true,
                         buildName: env.ARTIFACTORY_BUILD_NAME
                 )
-                echo "Pushing '${env.FULL_IMAGE_NAME}' image to Artifactory Docker registry (${env.ARTIFACTORY_REPO_NAME})"
                rtGradleDeployer(
                         id: 'deployer',
                         serverId: 'R3-Artifactory',

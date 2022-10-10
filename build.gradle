@@ -1,3 +1,10 @@
+buildscript {
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.16.1"
+    }
+
+}
+
 plugins {
     id 'java'
     id 'idea'
@@ -53,6 +60,8 @@ description 'Web3j base project.'
     }
 }
 
+apply plugin: 'com.jfrog.artifactory'
+
 allprojects {
     apply {
         [
@@ -95,4 +104,22 @@ allprojects {
 }
 configure(subprojects.findAll { it.name != 'integration-tests' }) {
     apply from: "$rootDir/gradle/jacoco/build.gradle"
+}
+
+artifactory {
+    publish {
+        contextUrl = artifactory_contextUrl
+        repository {
+            repoKey = System.getenv('CORDA_ARTIFACTORY_REPOKEY') ?: System.getProperty('corda.artifactory.repokey', 'corda-ent-maven-dev')
+            username = System.getenv('CORDA_ARTIFACTORY_USERNAME') ?: System.getProperty('corda.artifactory.username')
+            password = System.getenv('CORDA_ARTIFACTORY_PASSWORD') ?: System.getProperty('corda.artifactory.password')
+        }
+
+        defaults {
+            // Root project applies the plugin (for this block) but does not need to be published
+            if (project != rootProject) {
+                publications(project.extensions.publish.name())
+            }
+        }
+    }
 }
