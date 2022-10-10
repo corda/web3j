@@ -16,11 +16,11 @@ pipeline {
         ARTIFACTORY_CREDENTIALS = credentials('artifactory-credentials')
         ARTIFACTORY_BUILD_NAME = "Web3j artifact"
         ARTIFACTORY_SERVER = "software.r3.com"
-        ARTIFACTORY_REPO_NAME = "corda-dependency"
         ARTIFACTORY_SERVER_ID = 'R3-Artifactory'
         GRADLE_USER_HOME = "/host_tmp/gradle"
         CORDA_ARTIFACTORY_PASSWORD = "${env.ARTIFACTORY_CREDENTIALS_PSW}"
         CORDA_ARTIFACTORY_USERNAME = "${env.ARTIFACTORY_CREDENTIALS_USR}"
+        CORDA_ARTIFACTORY_REPOKEY = "corda-dependencies"
     }
     options {
         ansiColor('xterm')
@@ -50,7 +50,7 @@ pipeline {
                rtGradleDeployer(
                         id: 'deployer',
                         serverId: 'R3-Artifactory',
-                        repo: 'corda-dependency'
+                        repo: 'corda-dependencies'
                )
                rtGradleRun(
                         usesPlugin: true,
