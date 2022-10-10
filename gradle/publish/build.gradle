@@ -108,7 +108,7 @@ artifactory {
 //        }
 
         defaults {
-            publications(project.name)
+            publications("maven")
         }
     }
 }
