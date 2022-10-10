@@ -101,17 +101,18 @@ pipeline {
                     )
                     echo "Pushing '${FULL_IMAGE_NAME}' image to Artifactory Docker registry (${env.ARTIFACTORY_REPO_NAME})"
                    rtGradleDeployer(
-                           id: 'deployer',
-                           serverId: 'R3-Artifactory',
-                           repo: 'corda-dependency'
+                            id: 'deployer',
+                            serverId: 'R3-Artifactory',
+                            repo: 'corda-dependency'
                    )
                    rtGradleRun(
-                           usesPlugin: true,
-                           useWrapper: true,
-                           switches: '-s --info',
-                           tasks: 'artifactoryPublish',
-                           deployerId: 'deployer',
-                           buildName: env.ARTIFACTORY_BUILD_NAME
+                            usesPlugin: true,
+                            useWrapper: true,
+                            switches: '-s --info',
+                            tasks: 'artifactoryPublish',
+                            deployerId: 'deployer',
+                            buildName: env.ARTIFACTORY_BUILD_NAME
+                   )
                     echo 'Publishing build info to Artifactory server'
                     rtPublishBuildInfo(
                             serverId: env.ARTIFACTORY_SERVER_ID,
