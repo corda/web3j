@@ -27,11 +27,6 @@ pipeline {
         timeout(activity: true, time: 10)
     }
     stages {
-        stage('Prepare') {
-            steps {
-                sh 'apk add --update openjdk8-jre'
-            }
-        }
         stage('Build') {
             steps {
                 sh './gradlew assemble'
