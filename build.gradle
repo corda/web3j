@@ -60,16 +60,16 @@ description 'Web3j base project.'
     }
 }
 
-apply plugin: 'com.jfrog.artifactory'
+
 
 allprojects {
+    apply plugin: 'com.jfrog.artifactory'
     apply {
         [
             'java',
             'javadoc',
             'repositories',
-            'spotless',
-            'com.jfrog.artifactory'
+            'spotless'
         ].each { buildScript ->
             from("$rootDir/gradle/$buildScript/build.gradle")
         }
