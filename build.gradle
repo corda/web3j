@@ -14,6 +14,7 @@ plugins {
     id 'de.marcphilipp.nexus-publish' version '0.4.0'
     id 'de.undercouch.download' version '4.1.1'
     id 'org.ajoberstar.git-publish' version '3.0.1'
+    id 'maven-publish'
 }
 
 
@@ -114,6 +115,13 @@ artifactory {
             repoKey = System.getenv('CORDA_ARTIFACTORY_REPOKEY') ?: System.getProperty('corda.artifactory.repokey', 'corda-ent-maven-dev')
             username = System.getenv('CORDA_ARTIFACTORY_USERNAME') ?: System.getProperty('corda.artifactory.username')
             password = System.getenv('CORDA_ARTIFACTORY_PASSWORD') ?: System.getProperty('corda.artifactory.password')
+        }
+
+        defaults {
+            // Root project applies the plugin (for this block) but does not need to be published
+            if (project != rootProject) {
+                publications(project.extensions.publish.name())
+            }
         }
     }
 }
