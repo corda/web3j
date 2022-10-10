@@ -106,5 +106,9 @@ artifactory {
 //                publications(project.extensions.publish.name())
 //            }
 //        }
+
+        defaults {
+            publications(project.name)
+        }
     }
 }

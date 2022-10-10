@@ -1,9 +1,8 @@
-buildscript {
-    dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.16.1"
-    }
-
-}
+//buildscript {
+//    dependencies {
+//        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.16.1"
+//    }
+//}
 
 plugins {
     id 'java'
@@ -14,6 +13,7 @@ plugins {
     id 'de.marcphilipp.nexus-publish' version '0.4.0'
     id 'de.undercouch.download' version '4.1.1'
     id 'org.ajoberstar.git-publish' version '3.0.1'
+    id "com.jfrog.artifactory" version "4.7.5"
 }
 
 
@@ -59,8 +59,6 @@ description 'Web3j base project.'
         onlyIfModified true
     }
 }
-
-apply plugin: 'com.jfrog.artifactory'
 
 allprojects {
     apply {
