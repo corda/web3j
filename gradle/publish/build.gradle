@@ -90,7 +90,6 @@ signing {
         useInMemoryPgpKeys(signingKey.getText('UTF-8'), System.getenv('GPG_PASSPHRASE'))
     }
 }
-
 artifactory {
     publish {
         contextUrl = artifactory_contextUrl
