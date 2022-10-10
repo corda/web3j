@@ -20,7 +20,7 @@ pipeline {
         GRADLE_USER_HOME = "/host_tmp/gradle"
         CORDA_ARTIFACTORY_PASSWORD = "${env.ARTIFACTORY_CREDENTIALS_PSW}"
         CORDA_ARTIFACTORY_USERNAME = "${env.ARTIFACTORY_CREDENTIALS_USR}"
-        CORDA_ARTIFACTORY_REPOKEY = "corda-dependencies-dev"
+        CORDA_ARTIFACTORY_REPOKEY =  "${isReleaseTag() ? 'corda-dependencies' : 'corda-dependencies-dev'}"
     }
     options {
         ansiColor('xterm')
@@ -68,4 +68,9 @@ pipeline {
             }
         }
     }
+}
+
+
+def isReleaseTag() {
+    return (env.TAG_NAME =~ /^release-.*$/)
 }
