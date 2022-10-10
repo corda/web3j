@@ -55,7 +55,7 @@ pipeline {
                rtGradleRun(
                         usesPlugin: true,
                         useWrapper: true,
-                        switches: '-s --info',
+                        switches: '-s --info -x signMavenPublication',
                         tasks: 'artifactoryPublish',
                         deployerId: 'deployer',
                         buildName: env.ARTIFACTORY_BUILD_NAME
